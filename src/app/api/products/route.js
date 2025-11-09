@@ -1,3 +1,4 @@
+import express from "express";
 import { dbConnect } from "@/lib/dbConnect";
 import Product from "@/lib/models/Product";
 
