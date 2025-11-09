@@ -10,6 +10,7 @@ export default function AdminProductsPage() {
     category: "clothing",
     basePrice: "",
     stock: "",
+    images: [""], // start with one image input
   });
 
   const [products, setProducts] = useState([]);
@@ -28,12 +29,24 @@ export default function AdminProductsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate image count
+    const validImages = form.images.filter((url) => url.trim() !== "");
+    if (validImages.length < 1) {
+      alert("Please add at least one image link.");
+      return;
+    }
+    if (validImages.length > 3) {
+      alert("You can add a maximum of 3 images.");
+      return;
+    }
+
     try {
       // Convert numeric fields before sending
       const formattedData = {
         ...form,
         basePrice: Number(form.basePrice),
         stock: Number(form.stock),
+        images: validImages, // only include non-empty links
       };
 
       const res = await addProduct(formattedData);
@@ -46,11 +59,32 @@ export default function AdminProductsPage() {
         category: "clothing",
         basePrice: "",
         stock: "",
+        images: [""],
       });
 
       fetchProducts(); // refresh list
     } catch (error) {
       console.error("Error adding product:", error.response?.data || error);
+    }
+  };
+
+  // Dynamic image link handling
+  const handleImageChange = (index, value) => {
+    const updatedImages = [...form.images];
+    updatedImages[index] = value;
+    setForm({ ...form, images: updatedImages });
+  };
+
+  const addImageField = () => {
+    if (form.images.length < 3) {
+      setForm({ ...form, images: [...form.images, ""] });
+    }
+  };
+
+  const removeImageField = (index) => {
+    if (form.images.length > 1) {
+      const updatedImages = form.images.filter((_, i) => i !== index);
+      setForm({ ...form, images: updatedImages });
     }
   };
 
@@ -80,7 +114,7 @@ export default function AdminProductsPage() {
 
         <input
           type="text"
-          placeholder="Slug (unique)"
+          placeholder="Slug (unique preferred)"
           value={form.slug}
           onChange={(e) => setForm({ ...form, slug: e.target.value })}
           required
@@ -114,6 +148,42 @@ export default function AdminProductsPage() {
           className="border p-2 w-full rounded"
         />
 
+        {/* Dynamic Image Inputs */}
+        <div className="space-y-2">
+          <label className="font-medium">Image Links (1–3)</label>
+          {form.images.map((img, index) => (
+            <div key={index} className="flex gap-2 items-center">
+              <input
+                type="url"
+                placeholder={`Image URL ${index + 1}`}
+                value={img}
+                onChange={(e) => handleImageChange(index, e.target.value)}
+                required={index === 0}
+                className="border p-2 w-full rounded"
+              />
+              {form.images.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeImageField(index)}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+
+          {form.images.length < 3 && (
+            <button
+              type="button"
+              onClick={addImageField}
+              className="bg-gray-800 text-white px-3 py-1 rounded"
+            >
+              + Add Image
+            </button>
+          )}
+        </div>
+
         <button
           type="submit"
           className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
@@ -134,9 +204,18 @@ export default function AdminProductsPage() {
                 key={product._id}
                 className="border rounded p-3 flex justify-between items-center"
               >
-                <span>
-                  <strong>{product.name}</strong> – {product.category}
-                </span>
+                <div className="flex items-center gap-4">
+                  {product.images?.length > 0 && (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-12 h-12 object-cover mt-1 rounded"
+                    />
+                  )}
+                  <span>
+                    <strong>{product.name}</strong> – {product.category}
+                  </span>
+                </div>
                 <span>₹{product.basePrice}</span>
               </li>
             ))}

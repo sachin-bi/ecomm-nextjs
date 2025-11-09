@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-export default function HomePage() {
+export default function page() {
   return (
     <main className="bg-zinc-950 text-zinc-100 min-h-screen">
       {/* HERO SECTION */}

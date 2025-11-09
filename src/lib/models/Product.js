@@ -10,7 +10,8 @@ const ProductSchema = new mongoose.Schema({
     stock: { type: Number, default: 0 },
     variants: [
         {
-            sku: { type: String, unique: true },
+            // sku: { type: String, unique: true },
+            sku: { type: String },
             color: { type: String },
             size: { type: String },
             price: { type: Number, required: true },
